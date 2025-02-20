@@ -111,8 +111,11 @@ async def submit_review(request: Request):
         conn.commit()
         conn.close()
 
-        return JSONResponse({"message": "Отзыв успешно добавлен!"})
+        response = {"message": "Отзыв успешно добавлен!"}
+        print("Response:", response)  # Отладка
+        return JSONResponse(response)
     except Exception as e:
+        print("Error:", str(e))  # Отладка
         return JSONResponse({"error": str(e)}, status_code=500)
 
 # 📌 Запуск FastAPI-сервера
