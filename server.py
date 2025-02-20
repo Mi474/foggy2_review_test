@@ -13,16 +13,26 @@ DATABASE = "staff.db"
 def init_db():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
+    
+    # Создаём таблицу, если её нет
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS staff (
         user_id TEXT PRIMARY KEY,
-        name TEXT,
-        reviews INTEGER DEFAULT 0
+        name TEXT
     )
     """)
+    
+    # Проверяем, есть ли колонка review_count
+    cursor.execute("PRAGMA table_info(staff)")
+    columns = [col[1] for col in cursor.fetchall()]
+    
+    if "review_count" not in columns:
+        cursor.execute("ALTER TABLE staff ADD COLUMN review_count INTEGER DEFAULT 0")
+    
     conn.commit()
     conn.close()
 
+# Инициализируем БД
 init_db()
 
 # Создаём папку для хранения QR-кодов
