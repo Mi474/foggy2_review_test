@@ -95,8 +95,21 @@
                     body: JSON.stringify({ user_id, name })
                 });
 
-                let result = await response.json();
-                alert(result.message);
+                let result;
+                try {
+                    result = await response.json();
+                } catch (e) {
+                    alert("Ошибка: сервер вернул некорректный ответ");
+                    return;
+                }
+
+                if (result.error) {
+                    alert("Ошибка: " + result.error);
+                } else {
+                    alert(result.message);
+                    fetchLeaderboard();
+                }
+
                 fetchLeaderboard();  // Обновляем лидерборд после отправки отзыва
             } catch (error) {
                 console.error("Ошибка отправки отзыва", error);
