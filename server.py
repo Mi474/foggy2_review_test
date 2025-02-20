@@ -81,9 +81,11 @@ def get_user(user_id: str):
 async def get_leaderboard():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute("SELECT name, reviews FROM staff ORDER BY reviews DESC LIMIT 10")
+    cursor.execute("SELECT name, reviews FROM staff ORDER BY reviews DESC")
     users = [{"name": row[0], "reviews": row[1]} for row in cursor.fetchall()]
     conn.close()
+
+    print("Leaderboard Data:", users)  # Отладка
     return users
 
 # 📌 API для добавления отзыва
