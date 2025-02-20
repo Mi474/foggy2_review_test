@@ -108,6 +108,7 @@ async def submit_review(request: Request):
         if row:
             cursor.execute("UPDATE staff SET reviews = reviews + 1 WHERE user_id=?", (user_id,))
         else:
+            print(f"Новый пользователь {name} добавлен в базу с ID {user_id}")  # Отладка
             cursor.execute("INSERT INTO staff (user_id, name, reviews) VALUES (?, ?, 1)", (user_id, name))
 
         conn.commit()
