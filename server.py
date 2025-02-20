@@ -18,7 +18,8 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS staff (
         user_id TEXT PRIMARY KEY,
-        name TEXT
+        name TEXT,
+        review_count INTEGER DEFAULT 0
     )
     """)
     
