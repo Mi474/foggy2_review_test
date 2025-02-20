@@ -51,15 +51,14 @@
     </style>
 </head>
 <body>
-
     <div class="leaderboard">
         <h2>Лидерборд отзывов</h2>
         <ul class="staff-list" id="leaderboard"></ul>
-        <button class="review-button" id="reviewButton">Оставить отзыв</button>
+        <button id="reviewBtn">Оставить отзыв</button>
     </div>
 
     <script>
-        const API_URL = "https://foggy2reviewtest-production.up.railway.app"; // Твой сервер
+        const API_URL = "https://foggy2reviewtest-production.up.railway.app";
 
         async function fetchLeaderboard() {
             try {
@@ -79,33 +78,35 @@
             }
         }
 
-        async function sendReview() {
-            const userId = Telegram.WebApp.initDataUnsafe?.user?.id;
-            const userName = Telegram.WebApp.initDataUnsafe?.user?.first_name;
-
-            if (!userId || !userName) {
+        document.getElementById("reviewBtn").addEventListener("click", async () => {
+            if (!Telegram.WebApp.initDataUnsafe || !Telegram.WebApp.initDataUnsafe.user) {
                 alert("Ошибка получения данных Telegram.");
                 return;
             }
 
+            let user = Telegram.WebApp.initDataUnsafe.user;
+            let user_id = user.id;
+            let name = user.first_name || "Аноним";
+
             try {
-                let response = await fetch(`${API_URL}/review/${userId}/${userName}`, {
-                    method: "POST"
+                let response = await fetch(`${API_URL}/submit_review`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id, name })
                 });
 
                 let result = await response.json();
                 alert(result.message);
-                fetchLeaderboard();
+                fetchLeaderboard();  // Обновляем лидерборд после отправки отзыва
             } catch (error) {
                 console.error("Ошибка отправки отзыва", error);
+                alert("Ошибка отправки отзыва");
             }
-        }
+        });
 
-        document.getElementById("reviewButton").addEventListener("click", sendReview);
-        
         Telegram.WebApp.ready();
         fetchLeaderboard();
     </script>
-
 </body>
+
 </html>

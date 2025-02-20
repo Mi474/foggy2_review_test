@@ -7,6 +7,9 @@ from fastapi.responses import FileResponse
 
 app = FastAPI()
 
+# Имитация базы данных (можно заменить на SQLite)
+leaderboard = {}
+
 # Создаём папку для хранения QR-кодов
 if not os.path.exists("qr_codes"):
     os.makedirs("qr_codes")
@@ -124,3 +127,20 @@ async def leave_review(user_id: str, name: str):
     conn.commit()
     conn.close()
     return {"message": "Отзыв успешно добавлен!"}
+
+@app.post("/submit_review")
+async def submit_review(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    name = data.get("name")
+
+    if not user_id or not name:
+        return JSONResponse(content={"error": "Нет user_id или name"}, status_code=400)
+
+    # Увеличиваем количество отзывов пользователя
+    if user_id in leaderboard:
+        leaderboard[user_id]["reviews"] += 1
+    else:
+        leaderboard[user_id] = {"name": name, "reviews": 1}
+
+    return {"message": "Отзыв добавлен", "leaderboard": leaderboard}
