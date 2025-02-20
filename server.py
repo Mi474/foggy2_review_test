@@ -80,3 +80,47 @@ app.mount("/web", StaticFiles(directory="web"), name="web")
 @app.get("/")
 async def root():
     return FileResponse("web/index.html")
+
+# Подключение к базе данных
+DATABASE = "staff.db"
+
+def init_db():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS staff (
+        user_id TEXT PRIMARY KEY,
+        name TEXT,
+        reviews INTEGER DEFAULT 0
+    )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
+@app.get("/leaderboard")
+async def get_leaderboard():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, reviews FROM staff ORDER BY reviews DESC")
+    users = [{"name": row[0], "reviews": row[1]} for row in cursor.fetchall()]
+    conn.close()
+    return users
+
+@app.post("/review/{user_id}/{name}")
+async def leave_review(user_id: str, name: str):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT reviews FROM staff WHERE user_id=?", (user_id,))
+    row = cursor.fetchone()
+
+    if row:
+        cursor.execute("UPDATE staff SET reviews = reviews + 1 WHERE user_id=?", (user_id,))
+    else:
+        cursor.execute("INSERT INTO staff (user_id, name, reviews) VALUES (?, ?, 1)", (user_id, name))
+
+    conn.commit()
+    conn.close()
+    return {"message": "Отзыв успешно добавлен!"}
