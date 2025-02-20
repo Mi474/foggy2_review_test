@@ -3,6 +3,7 @@ import sqlite3
 import qrcode
 import os
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
@@ -74,3 +75,8 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 app.mount("/web", StaticFiles(directory="web"), name="web")
+
+# Отдаём index.html как главную страницу
+@app.get("/")
+async def root():
+    return FileResponse("web/index.html")
