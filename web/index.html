@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лидерборд отзывов</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+        }
+        .leaderboard {
+            width: 90%;
+            max-width: 400px;
+            margin: 20px auto;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .leaderboard h2 {
+            margin: 0 0 15px 0;
+        }
+        .staff-list {
+            list-style: none;
+            padding: 0;
+        }
+        .staff-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .staff-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="leaderboard">
+        <h2>Лидерборд отзывов</h2>
+        <ul class="staff-list" id="leaderboard"></ul>
+    </div>
+
+    <script>
+        const API_URL = "https://yourapp.up.railway.app"; // Заменить на твой сервер
+
+        async function fetchLeaderboard() {
+            try {
+                let response = await fetch(`${API_URL}/leaderboard`);
+                let data = await response.json();
+
+                let leaderboard = document.getElementById("leaderboard");
+                leaderboard.innerHTML = "";
+
+                data.forEach(user => {
+                    let li = document.createElement("li");
+                    li.textContent = `${user.name}: ${user.reviews} отзывов`;
+                    leaderboard.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Ошибка загрузки данных", error);
+            }
+        }
+
+        Telegram.WebApp.ready();
+        fetchLeaderboard();
+    </script>
+
+</body>
+</html>
