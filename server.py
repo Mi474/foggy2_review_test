@@ -89,26 +89,31 @@ async def get_leaderboard():
 # 📌 API для добавления отзыва
 @app.post("/submit_review")
 async def submit_review(request: Request):
-    data = await request.json()
-    user_id = data.get("user_id")
-    name = data.get("name", "Аноним")
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        name = data.get("name")
 
-    if not user_id:
-        return JSONResponse({"error": "Нет user_id"}, status_code=400)
+        if not user_id or not name:
+            return JSONResponse({"error": "Отсутствуют данные пользователя"}, status_code=400)
 
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-    cursor.execute("SELECT reviews FROM staff WHERE user_id=?", (user_id,))
-    row = cursor.fetchone()
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
 
-    if row:
-        cursor.execute("UPDATE staff SET reviews = reviews + 1 WHERE user_id=?", (user_id,))
-    else:
-        cursor.execute("INSERT INTO staff (user_id, name, reviews) VALUES (?, ?, 1)", (user_id, name))
+        cursor.execute("SELECT reviews FROM staff WHERE user_id=?", (user_id,))
+        row = cursor.fetchone()
 
-    conn.commit()
-    conn.close()
-    return JSONResponse({"message": "Отзыв успешно добавлен!"})
+        if row:
+            cursor.execute("UPDATE staff SET reviews = reviews + 1 WHERE user_id=?", (user_id,))
+        else:
+            cursor.execute("INSERT INTO staff (user_id, name, reviews) VALUES (?, ?, 1)", (user_id, name))
+
+        conn.commit()
+        conn.close()
+
+        return JSONResponse({"message": "Отзыв успешно добавлен!"})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 # 📌 Запуск FastAPI-сервера
 if __name__ == "__main__":
